@@ -7,7 +7,8 @@ from tempfile import mkdtemp
 from werkzeug.exceptions import default_exceptions, HTTPException, InternalServerError
 from werkzeug.security import check_password_hash, generate_password_hash
 
-from helpers import apology, login_required, lookup, usd
+from flask import redirect, render_template, request, session
+from helpers import *
 
 # Configure application
 app = Flask(__name__)
@@ -24,7 +25,7 @@ def after_request(response):
     return response
 
 # Custom filter
-app.jinja_env.filters["usd"] = usd
+# app.jinja_env.filters["usd"] = usd
 
 # Configure session to use filesystem (instead of signed cookies)
 app.config["SESSION_FILE_DIR"] = mkdtemp()
@@ -35,31 +36,38 @@ Session(app)
 # Configure CS50 Library to use SQLite database
 db = SQL("sqlite:///finance.db")
 
-# Make sure API key is set
-if not os.environ.get("API_KEY"):
-    raise RuntimeError("API_KEY not set")
+# # Make sure API key is set
+# if not os.environ.get("API_KEY"):
+#     raise RuntimeError("API_KEY not set")
 
 
 @app.route("/")
 @login_required
 def index():
-    """Show portfolio of stocks"""
-    return apology("TODO")
+    user_id = session.get("user_id")
+    return render_template("home.html")
 
 
-@app.route("/buy", methods=["GET", "POST"])
+@app.route("/random", methods=["GET", "POST"])
 @login_required
-def buy():
-    """Buy shares of stock"""
+def random():
+    """Fetch a random event"""
     return apology("TODO")
 
 
-@app.route("/history")
+@app.route("/wishlist")
 @login_required
-def history():
-    """Show history of transactions"""
+def wishlist():
+    """Show the user's wishlist of events"""
     return apology("TODO")
 
+
+@app.route("/browse", methods=["GET", "POST"])
+@login_required
+def browse():
+    """Browse events"""
+    rows = db.execute("SELECT id_event, name, date, short_description FROM events")
+    return render_template("browse.html", rows=rows)
 
 @app.route("/login", methods=["GET", "POST"])
 def login():
@@ -109,13 +117,6 @@ def logout():
     return redirect("/")
 
 
-@app.route("/quote", methods=["GET", "POST"])
-@login_required
-def quote():
-    """Get stock quote."""
-    return apology("TODO")
-
-
 @app.route("/register", methods=["GET", "POST"])
 def register():
     #TODO = DEFINE HASH
@@ -154,14 +155,6 @@ def register():
     # User reached route via GET (as by clicking a link or via redirect)
     else:
         return render_template("register.html")
-
-
-@app.route("/sell", methods=["GET", "POST"])
-@login_required
-def sell():
-    """Sell shares of stock"""
-    return apology("TODO")
-
 
 def errorhandler(e):
     """Handle error"""

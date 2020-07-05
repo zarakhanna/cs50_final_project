@@ -45,3 +45,12 @@ main img
     /* constrain images on small screens */
     max-width: 100%;
 }
+
+.nav-link
+{
+    color: #f8b8ff!important;
+}
+.nav-link:hover
+{
+    color: #ff63e5!important;
+}

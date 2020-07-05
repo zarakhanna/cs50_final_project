@@ -1,6 +1,7 @@
 import os
 import requests
 import urllib.parse
+import csv
 
 from flask import redirect, render_template, request, session
 from functools import wraps
@@ -58,6 +59,10 @@ def lookup(symbol):
         return None
 
 
-def usd(value):
-    """Format value as USD."""
-    return f"${value:,.2f}"
+def get_cities():
+    rows = []
+    with open('cities.csv', 'r') as file:
+        reader = csv.reader(file)
+        for row in reader:
+            rows.append(row)
+    return rows
