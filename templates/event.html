@@ -1,0 +1,18 @@
+{% extends "layout.html" %}
+
+{% block title %}
+    $tock50
+{% endblock %}
+
+
+{% block main %}
+    <h1>Welcome to the {{event['name']}}!</h1>
+    <h2>It falls on {{event['date'].strftime('%A, %-d %B')}} in the city of {{city['name']}}, {{city['country_name']}}</h2>
+    <h3 class="mb-5">{{event['long_description']}}</h3>
+
+    <a class="btn btn-primary" href="/browse">Back to Browse</a>
+    <button class="btn btn-primary">Add to Wishlist</button>
+
+
+
+{% endblock %}

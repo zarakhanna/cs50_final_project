@@ -1,4 +1,5 @@
 import os
+import datetime
 
 from cs50 import SQL
 from flask import Flask, flash, jsonify, redirect, render_template, request, session
@@ -46,6 +47,23 @@ db = SQL("sqlite:///finance.db")
 def index():
     user_id = session.get("user_id")
     return render_template("home.html")
+
+@app.route("/event/<id_event>", methods=["GET",])
+@login_required
+def learn(id_event):
+    """Learn about event"""
+    try:
+        event = db.execute(
+            "SELECT id_event, id_city, name, date, long_description FROM events WHERE id_event=:id_event",
+            id_event=id_event
+        )[0]
+        event['date'] = datetime.datetime.strptime(event['date'],'%Y-%m-%d')
+        city = db.execute(
+            "SELECT name, country_name FROM cities WHERE id_city=:id_city",
+            id_city=event['id_city'])[0]
+        return render_template("event.html", event=event, city=city)
+    except IndexError:
+        return apology("Event does not exist!")
 
 
 @app.route("/random", methods=["GET", "POST"])
