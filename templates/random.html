@@ -1,0 +1,18 @@
+{% extends "layout.html" %}
+
+{% block title %}
+    $tock50
+{% endblock %}
+
+
+{% block main %}
+    <h1>Welcome to... RANDOM!</h1>
+    <h2>Select from hearing about a Random event or Today's event, 100% sure to blow your mind!</h2>
+    <a class="btn btn-info" href="/event/{{id}}">Any Random</a>
+    {% if tod_id  %}
+    <a class="btn btn-info" href="/event/{{tod_id}}">Any Today</a>
+    {% else %}
+    <a class="btn btn-secondary disabled" aria-disabled="true">Any Today</a>
+    {% endif %}
+
+{% endblock %}

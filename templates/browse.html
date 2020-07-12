@@ -22,7 +22,11 @@
                 <td>{{row['date']}}</td>
                 <td>{{row['short_description']}}</td>
                 <td><a class="btn btn-primary" href="/event/{{row['id_event']}}">Learn More</a></td>
-                <td><button class="btn btn-primary">Add to Wishlist</button></td>
+                {% if row['id_user'] %}
+                <td><a class="btn btn-danger" href="/wishlist/remove/{{row['id_event']}}">Remove from Wishlist</a></td>
+                {% else %}
+                <td><a class="btn btn-primary" href="/wishlist/add/{{row['id_event']}}">Add to Wishlist</a></td>
+                {% endif %}
             </tr>
             {% endfor %}
 

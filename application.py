@@ -2,7 +2,7 @@ import os
 import datetime
 
 from cs50 import SQL
-from flask import Flask, flash, jsonify, redirect, render_template, request, session
+from flask import Flask, flash, jsonify, redirect, render_template, request, session, url_for
 from flask_session import Session
 from tempfile import mkdtemp
 from werkzeug.exceptions import default_exceptions, HTTPException, InternalServerError
@@ -35,7 +35,7 @@ app.config["SESSION_TYPE"] = "filesystem"
 Session(app)
 
 # Configure CS50 Library to use SQLite database
-db = SQL("sqlite:///finance.db")
+db = SQL("sqlite:///celby.db")
 
 # # Make sure API key is set
 # if not os.environ.get("API_KEY"):
@@ -70,21 +70,44 @@ def learn(id_event):
 @login_required
 def random():
     """Fetch a random event"""
-    return apology("TODO")
+    rows=db.execute("SELECT id_event FROM events ORDER BY RANDOM() LIMIT 1")
+    today_date = datetime.datetime.now().strftime("%Y-%m-%d")
+    todays=db.execute("SELECT id_event FROM events WHERE date=:date ORDER BY RANDOM() LIMIT 1", date=today_date)
+    if not todays:
+        return render_template("random.html", id=rows[0]['id_event'])
+    return render_template("random.html", id=rows[0]['id_event'], tod_id=todays[0]['id_event'])
 
-
-@app.route("/wishlist")
+@app.route("/wishlist/")
 @login_required
 def wishlist():
     """Show the user's wishlist of events"""
-    return apology("TODO")
+    wishes = db.execute("SELECT * FROM wishlist, events WHERE wishlist.id_user=:user_id and wishlist.id_event = events.id_event", user_id=session["user_id"])
+    return render_template("wishlist.html", wishes=wishes, name=session["user_name"].title())
+
+@app.route("/wishlist/add/<int:id_event>", methods=["GET",])
+@login_required
+def add_to_wishlist(id_event):
+    """Add given id_event to the user's wishlist of events"""
+    vals = [session["user_id"], id_event]
+    wishes = db.execute("INSERT INTO wishlist (id_user, id_event) VALUES (%s, %s)", vals)
+    return redirect(request.referrer or url_for("browse"))
+
+@app.route("/wishlist/remove/<int:id_event>", methods=["GET",])
+@login_required
+def remove_from_wishlist(id_event):
+    """Remove given id_event to the user's wishlist of events"""
+    wishes = db.execute("DELETE FROM wishlist WHERE id_user=:id_user AND id_event=:id_event", id_user=session['user_id'], id_event=id_event)
+    return redirect(request.referrer or url_for("wishlist"))
 
 
 @app.route("/browse", methods=["GET", "POST"])
 @login_required
 def browse():
     """Browse events"""
-    rows = db.execute("SELECT id_event, name, date, short_description FROM events")
+    rows = db.execute(
+        "SELECT events.id_event, name, date, short_description, id_user FROM events LEFT JOIN wishlist ON events.id_event=wishlist.id_event WHERE id_user=:id_user OR id_user IS NULL ORDER BY date",
+        id_user=session["user_id"]
+    )
     return render_template("browse.html", rows=rows)
 
 @app.route("/login", methods=["GET", "POST"])
