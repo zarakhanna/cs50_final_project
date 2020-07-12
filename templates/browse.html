@@ -6,7 +6,19 @@
 
 
 {% block main %}
+
     <h1>Event data:</h1>
+    <form action="/browse" method="post">
+        <div class="form-group">
+            <input autocomplete="off" autofocus class="form-control" name="city" placeholder="city" type="text">
+        </div>
+        <div class="form-group">
+            <input autocomplete="off" autofocus class="form-control" name="date" placeholder="dd-MM-yyyy" type="text">
+        </div>
+        <button class="btn btn-info" type="submit">Filter</button>
+    </form>
+    <hr/>
+
     <!--<h3>Wow, you have ${{cash}} in your virtual wallet!</h3>-->
             <table class="table table-striped table-dark table-bordered table-hover">
             <tr>

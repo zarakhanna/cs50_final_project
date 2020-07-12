@@ -99,16 +99,43 @@ def remove_from_wishlist(id_event):
     wishes = db.execute("DELETE FROM wishlist WHERE id_user=:id_user AND id_event=:id_event", id_user=session['user_id'], id_event=id_event)
     return redirect(request.referrer or url_for("wishlist"))
 
+def getRows(user_id):
+    return db.execute(
+        "SELECT events.id_event, name, date, short_description, id_user FROM events LEFT JOIN wishlist ON events.id_event=wishlist.id_event WHERE id_user=:id_user OR id_user IS NULL ORDER BY date",
+        id_user=user_id)
 
 @app.route("/browse", methods=["GET", "POST"])
 @login_required
 def browse():
     """Browse events"""
-    rows = db.execute(
-        "SELECT events.id_event, name, date, short_description, id_user FROM events LEFT JOIN wishlist ON events.id_event=wishlist.id_event WHERE id_user=:id_user OR id_user IS NULL ORDER BY date",
-        id_user=session["user_id"]
-    )
+    if request.method == "POST":
+        city = request.form.get("city")
+        date = request.form.get("date")
+        if not date and not city:
+            rows = getRows(session["user_id"])
+        elif not date:
+            city = db.execute("SELECT id_city FROM cities WHERE name=:name", name=city.title())
+            if not city:
+                return apology("No such city")
+            else:
+                city = city[0]["id_city"]
+            rows = db.execute("SELECT events.id_event, name, date, short_description, id_user FROM events LEFT JOIN wishlist ON events.id_event=wishlist.id_event WHERE events.id_city=:id_city AND (id_user=:id_user OR id_user IS NULL) ORDER BY date",
+            id_user=session["user_id"], id_city=city)
+        elif not city:
+            rows = db.execute("SELECT events.id_event, name, date, short_description, id_user FROM events LEFT JOIN wishlist ON events.id_event=wishlist.id_event WHERE events.date=:date AND (id_user=:id_user OR id_user IS NULL) ORDER BY date",
+            date = date, id_user=session["user_id"])
+        else:
+            city = db.execute("SELECT id_city FROM cities WHERE name=:name", name=city.title())
+            if not city:
+                return apology("No such city")
+            else:
+                city = city[0]["id_city"]
+            rows = db.execute("SELECT events.id_event, name, date, short_description, id_user FROM events LEFT JOIN wishlist ON events.id_event=wishlist.id_event WHERE events.id_city=:id_city AND events.date=:date AND (id_user=:id_user OR id_user IS NULL) ORDER BY date",
+            id_user=session["user_id"], id_city=city, date = date)
+    else:
+        rows = getRows(session["user_id"])
     return render_template("browse.html", rows=rows)
+
 
 @app.route("/login", methods=["GET", "POST"])
 def login():
