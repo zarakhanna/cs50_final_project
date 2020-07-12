@@ -134,7 +134,11 @@ def browse():
             id_user=session["user_id"], id_city=city, date = date)
     else:
         rows = getRows(session["user_id"])
-    return render_template("browse.html", rows=rows)
+    available_rows = db.execute("SELECT distinct cities.name FROM cities, events WHERE cities.id_city = events.id_city")
+    available_cities = []
+    for row in available_rows:
+        available_cities.append(row['name'])
+    return render_template("browse.html", available_cities=available_cities, rows=rows)
 
 
 @app.route("/login", methods=["GET", "POST"])

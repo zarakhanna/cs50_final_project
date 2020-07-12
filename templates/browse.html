@@ -6,11 +6,14 @@
 
 
 {% block main %}
-
     <h1>Event data:</h1>
     <form action="/browse" method="post">
         <div class="form-group">
-            <input autocomplete="off" autofocus class="form-control" name="city" placeholder="city" type="text">
+            <select autofocus class="form-control" name="city">
+                {% for city in available_cities %}
+                 <option value={{city}}>{{city}}</option>
+                 {% endfor %}
+            </select>
         </div>
         <div class="form-group">
             <input autocomplete="off" autofocus class="form-control" name="date" placeholder="dd-MM-yyyy" type="text">
