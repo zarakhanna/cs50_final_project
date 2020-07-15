@@ -8,15 +8,18 @@
 {% block main %}
     <h1>Event data:</h1>
     <form action="/browse" method="post">
+        <h2>Select a city to filter by</h2>
         <div class="form-group">
             <select autofocus class="form-control" name="city">
+                <option selected value> None </option>
                 {% for city in available_cities %}
-                 <option value={{city}}>{{city}}</option>
-                 {% endfor %}
+                <option value={{city.id_city}}>{{city.name}}</option>
+                {% endfor %}
             </select>
         </div>
         <div class="form-group">
-            <input autocomplete="off" autofocus class="form-control" name="date" placeholder="dd-MM-yyyy" type="text">
+            <h2>Pick a date to filter by (or leave it blank)</h2>
+            <input autocomplete="off" autofocus class="form-control" name="date" placeholder="yyyy-MM-dd" type="text">
         </div>
         <button class="btn btn-info" type="submit">Filter</button>
     </form>

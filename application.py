@@ -54,8 +54,15 @@ def learn(id_event):
     """Learn about event"""
     try:
         event = db.execute(
-            "SELECT id_event, id_city, name, date, long_description FROM events WHERE id_event=:id_event",
-            id_event=id_event
+            "SELECT events.id_event, id_city, name, date, long_description, id_user \
+            FROM events \
+            LEFT JOIN (\
+            SELECT * FROM wishlist \
+            WHERE id_user=:user_id\
+            ) as wishlist \
+            ON wishlist.id_event=events.id_event \
+            WHERE events.id_event=:id_event",
+            id_event=id_event, user_id=session["user_id"]
         )[0]
         event['date'] = datetime.datetime.strptime(event['date'],'%Y-%m-%d')
         city = db.execute(
@@ -101,7 +108,7 @@ def remove_from_wishlist(id_event):
 
 def getRows(user_id):
     return db.execute(
-        "SELECT events.id_event, name, date, short_description, id_user FROM events LEFT JOIN wishlist ON events.id_event=wishlist.id_event WHERE id_user=:id_user OR id_user IS NULL ORDER BY date",
+        "SELECT events.id_event, name, date, short_description, id_user FROM events LEFT JOIN (SELECT * FROM wishlist WHERE id_user=:id_user) as wl ON events.id_event=wl.id_event ORDER BY date",
         id_user=user_id)
 
 @app.route("/browse", methods=["GET", "POST"])
@@ -109,35 +116,43 @@ def getRows(user_id):
 def browse():
     """Browse events"""
     if request.method == "POST":
-        city = request.form.get("city")
+        id_city = request.form.get("city")
         date = request.form.get("date")
-        if not date and not city:
-            rows = getRows(session["user_id"])
-        elif not date:
-            city = db.execute("SELECT id_city FROM cities WHERE name=:name", name=city.title())
-            if not city:
-                return apology("No such city")
-            else:
-                city = city[0]["id_city"]
-            rows = db.execute("SELECT events.id_event, name, date, short_description, id_user FROM events LEFT JOIN wishlist ON events.id_event=wishlist.id_event WHERE events.id_city=:id_city AND (id_user=:id_user OR id_user IS NULL) ORDER BY date",
-            id_user=session["user_id"], id_city=city)
-        elif not city:
-            rows = db.execute("SELECT events.id_event, name, date, short_description, id_user FROM events LEFT JOIN wishlist ON events.id_event=wishlist.id_event WHERE events.date=:date AND (id_user=:id_user OR id_user IS NULL) ORDER BY date",
-            date = date, id_user=session["user_id"])
+        if id_city and date:
+            print(id_city) # ERROR IN LEFT JOIN, THIS LINE IS NOT PRINTING (typed using Zubins laptop)
+            rows = db.execute(
+"SELECT events.id_event, id_city, name, date, short_description, id_user \
+                FROM events \
+                LEFT JOIN (SELECT * FROM wishlist WHERE id_user=:id_user) as wl \
+                ON events.id_event=wl.id_event \
+                WHERE id_city=:id_city AND date=:date\
+                ORDER BY date"
+                ,id_user=session["user_id"], id_city=id_city, date=date)
+        elif id_city:
+            rows = db.execute(
+                "SELECT events.id_event, id_city, name, date, short_description, id_user \
+                FROM events \
+                LEFT JOIN (SELECT * FROM wishlist WHERE id_user=:id_user) as wl \
+                ON events.id_event=wl.id_event \
+                WHERE id_city=:id_city \
+                ORDER BY date",
+                id_user=session["user_id"], id_city=id_city)
+        elif date:
+            rows = db.execute(
+                "SELECT events.id_event, id_city, name, date, short_description, id_user \
+                FROM events \
+                LEFT JOIN (SELECT * FROM wishlist WHERE id_user=:id_user) as wl \
+                ON events.id_event=wl.id_event \
+                WHERE date=:date \
+                ORDER BY date",
+                id_user=session["user_id"], date=date)
         else:
-            city = db.execute("SELECT id_city FROM cities WHERE name=:name", name=city.title())
-            if not city:
-                return apology("No such city")
-            else:
-                city = city[0]["id_city"]
-            rows = db.execute("SELECT events.id_event, name, date, short_description, id_user FROM events LEFT JOIN wishlist ON events.id_event=wishlist.id_event WHERE events.id_city=:id_city AND events.date=:date AND (id_user=:id_user OR id_user IS NULL) ORDER BY date",
-            id_user=session["user_id"], id_city=city, date = date)
+            rows = getRows(session['user_id'])
+
+
     else:
         rows = getRows(session["user_id"])
-    available_rows = db.execute("SELECT distinct cities.name FROM cities, events WHERE cities.id_city = events.id_city")
-    available_cities = []
-    for row in available_rows:
-        available_cities.append(row['name'])
+    available_cities = db.execute("SELECT distinct cities.name, cities.id_city FROM cities, events WHERE cities.id_city = events.id_city")
     return render_template("browse.html", available_cities=available_cities, rows=rows)
 
 
