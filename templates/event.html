@@ -6,14 +6,14 @@
 
 {% block main %}
     <h1>Welcome to the {{event['name']}}!</h1>
-    <h2>It falls on {{event['date'].strftime('%A, %-d %B')}} in the city of {{city['name']}}, {{city['country_name']}}</h2>
+    <h2>It falls on {{event['date'].strftime('%A, %-d %B')}} in {{city['name']}}.</h2>
     <h3 class="mb-5">{{event['long_description']}}</h3>
 
-    <a class="btn btn-info" href="/browse">Go to Browse</a>
+    <a class="btn btn-outline-primary" href="/browse">Go to Browse</a>
     {% if event['id_user'] %}
-    <a class="btn btn-danger" href="/wishlist/remove/{{event['id_event']}}">Remove from Wishlist</a>
+    <a class="btn btn-outline-danger" href="/wishlist/remove/{{event['id_event']}}">Remove from Wishlist</a>
     {% else %}
-    <a class="btn btn-info" href="/wishlist/add/{{event['id_event']}}">Add to Wishlist</a>
+    <a class="btn btn-outline-success" href="/wishlist/add/{{event['id_event']}}">Add to Wishlist</a>
     {% endif %}
 
 {% endblock %}

@@ -30,7 +30,7 @@
             <tr>
                 <th>Name</th>
                 <th>Date</th>
-                <th>Description</th>
+                <th>Info-snippet</th>
                 <th>Learn More</th>
                 <th>Wishlist</th>
             </tr>
@@ -38,12 +38,12 @@
             <tr>
                 <td>{{row['name']}}</td>
                 <td>{{row['date']}}</td>
-                <td>{{row['short_description']}}</td>
-                <td><a class="btn btn-info" href="/event/{{row['id_event']}}">Learn More</a></td>
+                <td>{{row['long_description']|truncate(30)}}</td>
+                <td><a class="btn btn-outline-info" href="/event/{{row['id_event']}}">Learn More</a></td>
                 {% if row['id_user'] %}
-                <td><a class="btn btn-danger" href="/wishlist/remove/{{row['id_event']}}">Remove from Wishlist</a></td>
+                <td><a class="btn btn-outline-danger" href="/wishlist/remove/{{row['id_event']}}">Remove from Wishlist</a></td>
                 {% else %}
-                <td><a class="btn btn-info" href="/wishlist/add/{{row['id_event']}}">Add to Wishlist</a></td>
+                <td><a class="btn btn-outline-success" href="/wishlist/add/{{row['id_event']}}">Add to Wishlist</a></td>
                 {% endif %}
             </tr>
             {% endfor %}

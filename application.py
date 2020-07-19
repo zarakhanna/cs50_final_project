@@ -66,7 +66,7 @@ def learn(id_event):
         )[0]
         event['date'] = datetime.datetime.strptime(event['date'],'%Y-%m-%d')
         city = db.execute(
-            "SELECT name, country_name FROM cities WHERE id_city=:id_city",
+            "SELECT name FROM cities WHERE id_city=:id_city",
             id_city=event['id_city'])[0]
         return render_template("event.html", event=event, city=city)
     except IndexError:
@@ -108,7 +108,7 @@ def remove_from_wishlist(id_event):
 
 def getRows(user_id):
     return db.execute(
-        "SELECT events.id_event, name, date, short_description, id_user FROM events LEFT JOIN (SELECT * FROM wishlist WHERE id_user=:id_user) as wl ON events.id_event=wl.id_event ORDER BY date",
+        "SELECT events.id_event, name, date, long_description, id_user FROM events LEFT JOIN (SELECT * FROM wishlist WHERE id_user=:id_user) as wl ON events.id_event=wl.id_event ORDER BY date",
         id_user=user_id)
 
 @app.route("/browse", methods=["GET", "POST"])
@@ -121,7 +121,7 @@ def browse():
         if id_city and date:
             print(id_city) # ERROR IN LEFT JOIN, THIS LINE IS NOT PRINTING (typed using Zubins laptop)
             rows = db.execute(
-"SELECT events.id_event, id_city, name, date, short_description, id_user \
+"SELECT events.id_event, id_city, name, date, long_description, id_user \
                 FROM events \
                 LEFT JOIN (SELECT * FROM wishlist WHERE id_user=:id_user) as wl \
                 ON events.id_event=wl.id_event \
@@ -130,7 +130,7 @@ def browse():
                 ,id_user=session["user_id"], id_city=id_city, date=date)
         elif id_city:
             rows = db.execute(
-                "SELECT events.id_event, id_city, name, date, short_description, id_user \
+                "SELECT events.id_event, id_city, name, date, long_description, id_user \
                 FROM events \
                 LEFT JOIN (SELECT * FROM wishlist WHERE id_user=:id_user) as wl \
                 ON events.id_event=wl.id_event \
@@ -139,7 +139,7 @@ def browse():
                 id_user=session["user_id"], id_city=id_city)
         elif date:
             rows = db.execute(
-                "SELECT events.id_event, id_city, name, date, short_description, id_user \
+                "SELECT events.id_event, id_city, name, date, long_description, id_user \
                 FROM events \
                 LEFT JOIN (SELECT * FROM wishlist WHERE id_user=:id_user) as wl \
                 ON events.id_event=wl.id_event \

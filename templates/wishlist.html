@@ -25,9 +25,9 @@
             <tr>
                 <td>{{wish['name']}}</td>
                 <td>{{wish['date']}}</td>
-                <td>{{wish['short_description']}}</td>
-                <td><a class="btn btn-primary" href="/event/{{wish['id_event']}}">Learn More</a></td>
-                <td><a class="btn btn-warning" href="/wishlist/remove/{{wish['id_event']}}" > Remove from Wishlist</a></td>
+                <td>{{wish['long_description']|truncate(30)}}</td>
+                <td><a class="btn btn-outline-light" href="/event/{{wish['id_event']}}">Learn More</a></td>
+                <td><a class="btn btn-outline-warning" href="/wishlist/remove/{{wish['id_event']}}" > Remove from Wishlist</a></td>
             </tr>
             {% endfor %}
 
